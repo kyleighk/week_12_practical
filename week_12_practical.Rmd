@@ -1,0 +1,161 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+### Question 1
+
+* Use the approach described in Chapter 6.5.1 of Introduction to Statistical Learning to select the best subset of explanatory variables to predict richness in the RIKZ dataset
+  * The apparoch in shoud use cross-validation
+  * You do not need to include interaction, 
+
+```{r}
+library(tidyverse)
+library(leaps)
+```
+
+
+
+```{r}
+survey_data = as_tibble(read.delim("~/Documents/GitHub/MBIO612-F2021/week_10/data/RIKZ.txt", sep = "\t", header = TRUE))
+survey_data
+```
+
+```{r}
+head(survey_data)
+names(survey_data)
+dim(survey_data)
+```
+
+
+```{r}
+return_richness = function(x) {
+    if(x == "True"){
+      
+    }else{
+      print(0)
+    }
+    }
+
+    return_richness("True")
+    return_richness("False")
+```
+
+
+```{r}
+richness_stat = survey_data[1:45, 2:76] > 0
+```
+
+```{r}
+survey_richness = apply(richness_stat, 1, sum)
+survey_richness
+```
+
+```{r}
+sd_richness = survey_data %>% add_column(survey_richness, .before = 77)
+```
+
+
+```{r}
+sd_richness[1:6, 73:77]
+```
+
+
+```{r}
+richness_variables <- sd_richness[ , 77:90]
+richness_variables
+```
+
+
+
+
+```{r}
+regfit_full <- regsubsets(survey_richness ~ ., richness_variables)
+summary(regfit_full)
+```
+
+
+```{r}
+reg_summary <- summary(regfit_full)
+names(reg_summary)
+```
+
+```{r}
+reg_summary$rsq
+```
+```{r}
+?plot
+```
+
+```{r}
+par(mfrow = c(2, 2))
+plot(reg_summary$rss, xlab = "Number of Variables", 
+        ylab = "RSS", type = "b")
+plot(reg_summary$adjr2, xlab = "Number of Variables", 
+      ylab = "Adjusted RSq", type = "b")
+```
+
+```{r}
+set.seed(1)
+train <- sample(c(TRUE, FALSE), nrow(richness_variables), replace = TRUE)
+test <- (!train)
+```
+```{r}
+?regsubsets
+```
+
+```{r}
+pred
+```
+
+```{r}
+regfit_best <- regsubsets(survey_richness ~., richness_variables[train, ], nvmax = 14)
+```
+
+```{r}
+test_mat <- model.matrix(survey_richness ~ ., richness_variables[train, ], nvmax = 14)
+```
+
+```{r}
+richness_variables$survey_richness[test]
+```
+
+```{r}
+   coefi <- coef(regfit_best, id = i)
+```
+
+```{r}
+val_errors <- rep(NA, 14)
+for(i in 1:14){
+    coefi <- coef(regfit_best, id = i)
+    pred <- test_mat[ , names(coefi)] %*% coefi
+    val_errors[i] <- mean((richness_variables$survey_richness[test] - pred^2))
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
